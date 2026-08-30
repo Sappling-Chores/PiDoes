@@ -1,0 +1,71 @@
+QWidget#main-window {
+    background: grey;
+}
+
+QCheckBox {
+    background: #EAEBED;
+    height: 64px;
+    spacing: 8px;
+    font-size: 14px;
+    color: #333;
+    padding-left: 8px;
+    padding-right: 16px;
+    margin-right: 0px;
+}
+
+QCheckBox::indicator {
+    width: 18px;
+    height: 18px;
+    border-radius: 11px;
+    border: 2px solid #A7A7A7;
+    background: white;
+}
+
+QCheckBox::indicator:hover {
+    border-color: #666;
+}
+
+QCheckBox::indicator:unchecked {
+    background: white;
+}
+
+QCheckBox::indicator:checked {
+    background: #687681;
+    image: url(./assets/tick.png);
+}
+
+QCheckBox::indicator:indeterminate {
+    background: #FFC107;
+}
+
+QCheckBox::indicator:disabled {
+    background: #eee;
+    border-color: #ccc;
+}
+
+QLineEdit#text-box {
+    border: none;
+    background: #EAEBED;
+    font-size: 20px;
+    color: #414141;
+    font-family: "Inter";
+    margin-left: 0px;
+}
+
+QPushButton {
+    border-radius: none;
+    padding-right: 2px;
+    padding-left: 2px;
+}
+
+QPushButton:hover {
+    background: white;
+    border-radius: 8px;
+}
+
+QFrame#ClockFrame {
+    background: #EAEBED;
+    border-radius: none;
+    padding-right: 2px;
+    padding-left: 2px;
+}

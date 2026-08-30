@@ -1,0 +1,17 @@
+{
+  "last_checked": [
+    2026,
+    8,
+    26
+  ],
+  "urls": [
+    {
+      "wallpaper": "https://images.unsplash.com/photo-1482784160316-6eb046863ece?crop=entropy&cs=srgb&fm=jpg&ixid=M3wxMDA1OTc2fDB8MXxyYW5kb218fHx8fHx8fHwxNzg3NzI5MTU0fA&ixlib=rb-4.1.0&q=85",
+      "nature": "https://images.unsplash.com/photo-1475776408506-9a5371e7a068?crop=entropy&cs=srgb&fm=jpg&ixid=M3wxMDA1OTc2fDB8MXxyYW5kb218fHx8fHx8fHwxNzg3NzI5MTU1fA&ixlib=rb-4.1.0&q=85",
+      "japan": "https://images.unsplash.com/photo-1484995978482-cf913162930c?crop=entropy&cs=srgb&fm=jpg&ixid=M3wxMDA1OTc2fDB8MXxyYW5kb218fHx8fHx8fHwxNzg3NzI5MTU2fA&ixlib=rb-4.1.0&q=85",
+      "landscape": "https://images.unsplash.com/photo-1495710388177-22c73fa5f84e?crop=entropy&cs=srgb&fm=jpg&ixid=M3wxMDA1OTc2fDB8MXxyYW5kb218fHx8fHx8fHwxNzg3NzI5MTU2fA&ixlib=rb-4.1.0&q=85",
+      "in-space": "https://images.unsplash.com/photo-1707653056955-1835d800f4f7?crop=entropy&cs=srgb&fm=jpg&ixid=M3wxMDA1OTc2fDB8MXxyYW5kb218fHx8fHx8fHwxNzg3NzI5MTU4fA&ixlib=rb-4.1.0&q=85",
+      "technology": "https://images.unsplash.com/photo-1617396900799-f4ec2b43c7ae?crop=entropy&cs=srgb&fm=jpg&ixid=M3wxMDA1OTc2fDB8MXxyYW5kb218fHx8fHx8fHwxNzg3NzI5MTU5fA&ixlib=rb-4.1.0&q=85"
+    }
+  ]
+}

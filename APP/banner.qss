@@ -1,0 +1,25 @@
+/* Title text overlaid on the banner image */
+QLabel#title-label {
+    background: transparent;
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+}
+
+/* Date text below the title */
+QLabel#date-label {
+    background: transparent;
+    color: white;
+    font-size: 18px;
+}
+
+/* Container that centers the title vertically */
+QFrame#title-frame {
+    background: transparent;
+}
+
+/* Wallpaper selection button overlay */
+QPushButton#wallpaper-btn {
+    background-color: transparent;
+}
+

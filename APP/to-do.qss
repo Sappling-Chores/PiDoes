@@ -1,0 +1,110 @@
+QCheckBox {
+    background: transparent;
+    height: 26px;              /* was 64px — taller than the card itself */
+    spacing: 8px;
+    font-size: 14px;
+    color: #333;
+    padding-right: 16px;
+    margin-left: 8px;
+    border-radius: 8px;
+}
+
+QCheckBox::indicator {
+    width: 18px;
+    height: 18px;
+    border-radius: 11px;
+    border: 2px solid #A7A7A7;
+    background: white;
+}
+
+QCheckBox::indicator:hover {
+    border-color: #666;
+}
+
+QCheckBox::indicator:unchecked {
+    background: white;
+}
+
+QCheckBox::indicator:checked {
+    background: #687681;
+    image: url(./assets/tick.png);
+}
+
+QCheckBox::indicator:indeterminate {
+    background: #FFC107;
+}
+
+QCheckBox::indicator:disabled {
+    background: #eee;
+    border-color: #ccc;
+}
+
+QFrame#card-body {
+    background: rgba(255, 255, 255, 140);   /* see-through, was solid white */
+    min-width: 260px;                        /* was fixed width: 150px — too narrow for the row */
+    border: 1px solid rgba(200, 200, 200, 120);
+    border-radius: 0px;                      /* totally rectangular, was 8px */
+}
+QFrame#card-body[hovered="true"] {
+    background: rgba(255, 255, 255, 200);
+    border: 1px solid #687681;
+    border-radius: 0px;
+}
+
+QLabel#task-label[mode="active"] {
+    font-family: Inter;
+    font-size: 16px;
+    color: #414141;
+}
+
+QLabel#task-label[mode="done"] {
+    font-family: Inter;
+    font-size: 16px;
+    color: #787878;
+    text-decoration: line-through;
+}
+
+QFrame#card-body[hovered="true"] QLabel#task-label[mode="active"] {
+    color: #687681;
+}
+
+QLabel#schedule-label[mode="active"] {
+    font-family: Inter;
+    font-size: 12px;
+    color: #414141;
+}
+
+QLabel#schedule-label[mode="done"] {
+    font-family: Inter;
+    font-size: 12px;
+    color: #787878;
+    text-decoration: line-through;
+}
+
+QLabel#hover-arrow {
+    font-family: Inter;
+    font-size: 15px;
+    color: #687681;
+}
+
+QPushButton#star-button {
+    border: none;
+    background: transparent;
+    font-size: 15px;
+    color: #A7A7A7;
+}
+QPushButton#star-button:checked {
+    color: #E8A93B;
+}
+
+QPushButton#delete-button {
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: bold;
+    color: #C0605C;
+    border-radius: 13px;
+}
+QPushButton#delete-button:hover {
+    background-color: rgba(192, 96, 92, 30);
+}
