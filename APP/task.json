@@ -38,73 +38,29 @@
       2026
     ]
   },
-
   "task": {
-    "2026-08-24": [
-      {
-        "id": 1,
-        "task": "Complete Physics Lecture",
-        "due_date": [24, 8, 2026],
-        "due_time": [],
-        "created_at": "2026-08-30T07:11:05",
-        "done": false,
-        "priority": true
-      }
-    ],
-    "2026-08-25": [
-      {
-        "id": 1,
-        "task": "Complete Physics Lecture",
-        "due_date": [25, 8, 2026],
-        "due_time": [],
-        "created_at": "2026-08-30T07:11:05",
-        "done": false,
-        "priority": true
-      }
-    ],
-    "2026-08-26": [
-      {
-        "id": 1,
-        "task": "Complete Physics Lecture",
-        "due_date": [26, 8, 2026],
-        "due_time": [],
-        "created_at": "2026-08-30T07:11:05",
-        "done": false,
-        "priority": true
-      }
-    ],
-    "2026-08-27": [
-      {
-        "id": 1,
-        "task": "Complete Physics Lecture",
-        "due_date": [27, 8, 2026],
-        "due_time": [],
-        "created_at": "2026-08-30T07:11:05",
-        "done": false,
-        "priority": true
-      }
-    ],
-    "2026-08-28": [
-      {
-        "id": 1,
-        "task": "Complete Physics Lecture",
-        "due_date": [28, 8, 2026],
-        "due_time": [],
-        "created_at": "2026-08-30T07:11:05",
-        "done": false,
-        "priority": true
-      }
-    ],
+    "2026-08-24": [],
+    "2026-08-25": [],
+    "2026-08-26": [],
+    "2026-08-27": [],
+    "2026-08-28": [],
     "2026-08-29": [],
-    "2026-08-30": []
+    "2026-08-30": [],
+    "Tuesday": [
+      {
+        "id": 1,
+        "task": "yeah",
+        "date": [
+          1,
+          9,
+          2026
+        ],
+        "time": [],
+        "created_at": "2026-09-01T04:06:03",
+        "done": false,
+        "priority": false
+      }
+    ]
   },
-  "incomplete_task": [
-    ["Task_1", "2026-08-24"],
-    ["Complete Physics Lecture", ["Monday", "2026-08-24"]],
-    ["Complete Physics Lecture", ["Tuesday", "2026-08-25"]],
-    ["Complete Physics Lecture", ["Wednesday", "2026-08-26"]],
-    ["Complete Physics Lecture", ["Thursday", "2026-08-27"]],
-    ["Complete Physics Lecture", ["Friday", "2026-08-28"]],
-    ["Complete Physics Lecture", ["Sunday", "2026-08-30"]]
-  ]
+  "incomplete_task": []
 }

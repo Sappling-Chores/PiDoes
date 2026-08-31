@@ -5,6 +5,11 @@ import os
 import json
 from typing import Optional, Dict, Any, List
 
+try:
+    from paths import URLS_JSON
+except ImportError:
+    from APP.paths import URLS_JSON
+
 from PySide6.QtWidgets import (
     QApplication, QDialog, QWidget, QVBoxLayout, QHBoxLayout,
     QGridLayout, QLabel, QScrollArea, QFrame, QPushButton, QSizePolicy
@@ -50,7 +55,7 @@ class WallpaperTile(QWidget):
     A square preview tile representing either a static color or an image wallpaper.
     Acts like an interactive button with hover and active selection ring styling.
     """
-    clicked = Signal(dict)  # Emits tile info payload dict on click
+    clicked = Signal(dict)
 
     def __init__(
         self,
@@ -64,9 +69,9 @@ class WallpaperTile(QWidget):
         self.value = value
         self.network_manager = network_manager
 
-        self._selected = False
-        self._hovered = False
         self.pixmap: Optional[QPixmap] = None
+        self.is_selected = False
+        self.is_hovered = False
         self.is_loading = False
 
         self.setFixedSize(56, 56)
@@ -74,13 +79,12 @@ class WallpaperTile(QWidget):
         self.setMouseTracking(True)
 
         if self.tile_type == "image" and self.network_manager:
-            self._load_remote_image()
+            self._fetch_image()
 
-    def _load_remote_image(self):
-        """Fetch remote image asynchronously using QNetworkAccessManager."""
-        if not self.value or not self.network_manager:
-            return
+    def _fetch_image(self):
         self.is_loading = True
+        self.update()
+
         request = QNetworkRequest(QUrl(self.value))
         reply = self.network_manager.get(request)
         reply.finished.connect(lambda: self._on_image_downloaded(reply))
@@ -89,27 +93,24 @@ class WallpaperTile(QWidget):
         self.is_loading = False
         if reply.error() == QNetworkReply.NoError:
             data = reply.readAll()
-            pix = QPixmap()
-            if pix.loadFromData(data):
-                self.pixmap = pix
-                self.update()
+            pixmap = QPixmap()
+            if pixmap.loadFromData(data):
+                self.pixmap = pixmap
         reply.deleteLater()
+        self.update()
 
     def set_selected(self, selected: bool):
-        if self._selected != selected:
-            self._selected = selected
+        if self.is_selected != selected:
+            self.is_selected = selected
             self.update()
 
-    def is_selected(self) -> bool:
-        return self._selected
-
     def enterEvent(self, event):
-        self._hovered = True
+        self.is_hovered = True
         self.update()
         super().enterEvent(event)
 
     def leaveEvent(self, event):
-        self._hovered = False
+        self.is_hovered = False
         self.update()
         super().leaveEvent(event)
 
@@ -122,70 +123,47 @@ class WallpaperTile(QWidget):
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
-        painter.setRenderHint(QPainter.SmoothPixmapTransform)
 
-        rect = self.rect()
-        margin = 4 if self._selected else 2
-        content_rect = QRectF(rect).adjusted(margin, margin, -margin, -margin)
-        corner_radius = 4.0
+        rect = QRectF(self.rect())
 
-        # Create rounded clipping path for content
+        # 1. Base Tile Content
         path = QPainterPath()
-        path.addRoundedRect(content_rect, corner_radius, corner_radius)
+        path.addRoundedRect(rect, 8, 8)
 
         painter.save()
         painter.setClipPath(path)
 
         if self.tile_type == "color":
-            color = QColor(self.value)
-            painter.fillRect(content_rect, color)
+            painter.fillRect(rect, QColor(self.value))
         elif self.tile_type == "image":
             if self.pixmap and not self.pixmap.isNull():
-                # Center-crop & scale image to fill tile
                 scaled = self.pixmap.scaled(
-                    int(content_rect.width()),
-                    int(content_rect.height()),
+                    self.size(),
                     Qt.KeepAspectRatioByExpanding,
                     Qt.SmoothTransformation
                 )
-                x = content_rect.x() + (content_rect.width() - scaled.width()) / 2.0
-                y = content_rect.y() + (content_rect.height() - scaled.height()) / 2.0
+                x = (self.width() - scaled.width()) / 2
+                y = (self.height() - scaled.height()) / 2
                 painter.drawPixmap(int(x), int(y), scaled)
             else:
-                # Loading / placeholder style
-                painter.fillRect(content_rect, QColor("#2d2d3a"))
+                painter.fillRect(rect, QColor("#e5e5e5"))
                 if self.is_loading:
-                    painter.setPen(QColor("#666677"))
-                    painter.drawText(content_rect, Qt.AlignCenter, "...")
+                    pen = QPen(QColor("#888888"), 2)
+                    painter.setPen(pen)
+                    painter.drawText(rect, Qt.AlignCenter, "...")
+
+        # 2. Hover overlay tint
+        if self.is_hovered and not self.is_selected:
+            painter.fillRect(rect, QColor(255, 255, 255, 40))
+
         painter.restore()
 
-        # Draw borders & selection indicators
-        if self._selected:
-            # Outer selection ring (Windows 11 double border highlight)
-            ring_rect = QRectF(rect).adjusted(1, 1, -1, -1)
-            pen = QPen(QColor("#409eff"), 2.5)
-            painter.setPen(pen)
+        # 3. Selection Indicator Ring
+        if self.is_selected:
+            ring_pen = QPen(QColor("#0078d4"), 3)
+            painter.setPen(ring_pen)
             painter.setBrush(Qt.NoBrush)
-            painter.drawRoundedRect(ring_rect, corner_radius + 2, corner_radius + 2)
-
-            # Inner subtle contrast border
-            inner_pen = QPen(QColor("#ffffff"), 1.0)
-            painter.setPen(inner_pen)
-            painter.drawRoundedRect(content_rect, corner_radius, corner_radius)
-
-        elif self._hovered:
-            pen = QPen(QColor("#ffffff"), 1.5)
-            painter.setPen(pen)
-            painter.setBrush(Qt.NoBrush)
-            painter.drawRoundedRect(content_rect, corner_radius, corner_radius)
-        else:
-            # Subtle default border for static colors
-            border_color = QColor("#000000")
-            border_color.setAlpha(60)
-            pen = QPen(border_color, 1.0)
-            painter.setPen(pen)
-            painter.setBrush(Qt.NoBrush)
-            painter.drawRoundedRect(content_rect, corner_radius, corner_radius)
+            painter.drawRoundedRect(rect.adjusted(1.5, 1.5, -1.5, -1.5), 8, 8)
 
 
 class WallpaperDialog(QDialog):
@@ -194,25 +172,53 @@ class WallpaperDialog(QDialog):
     """
     wallpaper_selected = Signal(dict)
 
-    def __init__(self, parent: Optional[QWidget] = None):
+    def __init__(self, parent: Optional[QWidget] = None, current_wallpaper: Optional[Dict[str, Any]] = None):
         super().__init__(parent)
+        self._current_wallpaper = current_wallpaper
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowTitle("Theme")
         self.setMinimumSize(340, 400)
         self.resize(360, 440)
-        self.setStyleSheet("""
-            QDialog {
-                background-color: #202020;
-                color: #ffffff;
-                font-family: 'Segoe UI', Arial, sans-serif;
-                border: 1px solid #3c3c3c;
+
+        self.network_manager = QNetworkAccessManager(self)
+        self.tiles: List[WallpaperTile] = []
+        self.selected_item: Optional[Dict[str, Any]] = None
+
+        self._init_ui()
+        self._load_wallpapers()
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self._drag_pos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
+            event.accept()
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() == Qt.LeftButton and hasattr(self, "_drag_pos"):
+            self.move(event.globalPosition().toPoint() - self._drag_pos)
+            event.accept()
+        super().mouseMoveEvent(event)
+
+    def _init_ui(self):
+        # Outer dialog layout
+        dialog_layout = QVBoxLayout(self)
+        dialog_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Solid background container card
+        self.container_frame = QFrame(self)
+        self.container_frame.setObjectName("dialogContainer")
+        self.container_frame.setStyleSheet("""
+            QFrame#dialogContainer {
+                background-color: #ffffff;
+                border: 1px solid #d0d0d0;
                 border-radius: 12px;
             }
             QLabel#titleLabel {
                 font-size: 18px;
-                font-weight: 500;
-                color: #ffffff;
+                font-weight: 600;
+                color: #1a1a1a;
+                font-family: 'Segoe UI', Arial, sans-serif;
             }
             QPushButton#closeButton {
                 background: transparent;
@@ -223,8 +229,8 @@ class WallpaperDialog(QDialog):
                 border-radius: 12px;
             }
             QPushButton#closeButton:hover {
-                background-color: #333333;
-                color: #ffffff;
+                background-color: #f0f0f0;
+                color: #333333;
             }
             QScrollArea {
                 border: none;
@@ -249,51 +255,31 @@ class WallpaperDialog(QDialog):
                 background-color: #005a9e;
             }
             QPushButton#cancelButton {
-                background-color: #2d2d2d;
-                color: #cccccc;
-                border: 1px solid #444444;
+                background-color: #f5f5f5;
+                color: #333333;
+                border: 1px solid #cccccc;
                 border-radius: 4px;
                 padding: 6px 16px;
                 font-size: 12px;
             }
             QPushButton#cancelButton:hover {
-                background-color: #383838;
-                color: white;
+                background-color: #e8e8e8;
+                color: #1a1a1a;
             }
         """)
 
-        self.network_manager = QNetworkAccessManager(self)
-        self.tiles: List[WallpaperTile] = []
-        self.selected_item: Optional[Dict[str, Any]] = None
-
-        self._init_ui()
-        self._load_wallpapers()
-
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self._drag_pos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
-            event.accept()
-        super().mousePressEvent(event)
-
-    def mouseMoveEvent(self, event):
-        if event.buttons() == Qt.LeftButton and hasattr(self, "_drag_pos"):
-            self.move(event.globalPosition().toPoint() - self._drag_pos)
-            event.accept()
-        super().mouseMoveEvent(event)
-
-    def _init_ui(self):
-        main_layout = QVBoxLayout(self)
+        main_layout = QVBoxLayout(self.container_frame)
         main_layout.setContentsMargins(18, 18, 18, 14)
         main_layout.setSpacing(12)
 
         # Dialog Title & Close Button Header
         header_layout = QHBoxLayout()
-        title_label = QLabel("Theme", self)
+        title_label = QLabel("Theme", self.container_frame)
         title_label.setObjectName("titleLabel")
         header_layout.addWidget(title_label)
         header_layout.addStretch(1)
 
-        close_btn = QPushButton("✕", self)
+        close_btn = QPushButton("✕", self.container_frame)
         close_btn.setObjectName("closeButton")
         close_btn.setFixedSize(24, 24)
         close_btn.setCursor(Qt.PointingHandCursor)
@@ -303,7 +289,7 @@ class WallpaperDialog(QDialog):
         main_layout.addLayout(header_layout)
 
         # Scrollable Grid Area
-        self.scroll_area = QScrollArea(self)
+        self.scroll_area = QScrollArea(self.container_frame)
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
@@ -322,17 +308,18 @@ class WallpaperDialog(QDialog):
         button_layout = QHBoxLayout()
         button_layout.addStretch(1)
 
-        self.cancel_button = QPushButton("Cancel", self)
+        self.cancel_button = QPushButton("Cancel", self.container_frame)
         self.cancel_button.setObjectName("cancelButton")
         self.cancel_button.clicked.connect(self.reject)
         button_layout.addWidget(self.cancel_button)
 
-        self.apply_button = QPushButton("Select", self)
+        self.apply_button = QPushButton("Select", self.container_frame)
         self.apply_button.setObjectName("applyButton")
         self.apply_button.clicked.connect(self.accept)
         button_layout.addWidget(self.apply_button)
 
         main_layout.addLayout(button_layout)
+        dialog_layout.addWidget(self.container_frame)
 
     def _load_urls_from_json(self) -> List[str]:
         """Loads wallpaper URLs from urls.json (checks local dir and APP/urls.json) and deduplicates against fallbacks."""
@@ -409,11 +396,21 @@ class WallpaperDialog(QDialog):
                 col = 0
                 row += 1
 
-        # Pre-select sky blue by default (matching the reference image highlight)
-        if len(self.tiles) > 7:
-            self._select_tile(self.tiles[7])
-        elif self.tiles:
-            self._select_tile(self.tiles[0])
+        # Pre-select tile matching current wallpaper; fall back to sky blue or first tile
+        matched = False
+        if self._current_wallpaper:
+            ctype = self._current_wallpaper.get("type")
+            cval = self._current_wallpaper.get("value")
+            for tile in self.tiles:
+                if tile.tile_type == ctype and tile.value == cval:
+                    self._select_tile(tile)
+                    matched = True
+                    break
+        if not matched:
+            if len(self.tiles) > 7:
+                self._select_tile(self.tiles[7])
+            elif self.tiles:
+                self._select_tile(self.tiles[0])
 
     def _on_tile_clicked(self, payload: dict):
         sender = self.sender()

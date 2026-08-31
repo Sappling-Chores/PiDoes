@@ -1,362 +1,316 @@
-import sys
+﻿import sys
 import os
 import datetime
 from PySide6.QtWidgets import (
-    QTextEdit, QLineEdit, QVBoxLayout, QHBoxLayout, QApplication, QWidget,
-    QFrame, QLabel, QCheckBox, QPushButton, QDialog, QCalendarWidget,
-    QTimeEdit, QDialogButtonBox
+    QLineEdit, QVBoxLayout, QHBoxLayout, QApplication, QWidget,
+    QFrame, QLabel, QPushButton, QDialog, QCalendarWidget,
+    QTimeEdit, QDialogButtonBox, QStackedWidget
 )
-from PySide6.QtGui import QIcon
-from PySide6.QtCore import QSize, QByteArray, Qt, QDate, QTime, Signal
-from PySide6.QtSvg import QSvgRenderer
+from PySide6.QtGui import QIcon, QFont
+from PySide6.QtCore import QSize, Qt, QDate, QTime, Signal
 import json
 
+try:
+    from paths import ASSETS_DIR, TASK_JSON
+except ImportError:
+    from APP.paths import ASSETS_DIR, TASK_JSON
+
+
+def _asset_path(name):
+    return str(ASSETS_DIR / name)
+
+
+# â”€â”€ Shared style constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+_BAR_HEIGHT = 56
+_BAR_BG     = "rgba(255, 255, 255, 140)"
+_ICON_BTN   = """
+    QPushButton {
+        background: transparent;
+        border: none;
+        border-radius: 8px;
+        padding: 0px;
+    }
+    QPushButton:hover {
+        background: rgba(0,0,0,15);
+        border-radius: 8px;
+    }
+"""
+
+
 class TextBox(QWidget):
-  # Emitted after a task is successfully written to task.json, so a
-  # container (e.g. ToDoCard) can refresh its task list.
-  task_added = Signal()
+    """Two-state add-task bar.
 
-  def __init__(self):
-    super().__init__()
-    self.setWindowTitle("textbox-preview")
-    self.setObjectName("main-window")
-    # self.setMaximumWidth(1120)
-    # self.setMaximumHeight(128)
-    h_layout = QHBoxLayout()
-    h_layout.setSpacing(0)
-    h_layout.setContentsMargins(0, 0, 0, 0)
-    v_layout = QVBoxLayout()
-    check_box = QCheckBox()
-    check_box.setMaximumWidth(32)
-    check_box.setStyleSheet(
-      """
-      QCheckBox {
-        background:  #EAEBED;
-        height: 64px;
-        spacing: 8px;
-        font-size: 14px;
-        color: #333;
-        padding-left: 8px;
-        padding-right:16px;
-        margin-right: 0px;
-    }
+    Collapsed: shows "+ Add a task" prompt, calendar + clock icons on the right.
+    Expanded:  shows QLineEdit that fills the full width; same calendar + clock icons
+               stay on the right touching each other.  Clicking away or pressing Escape
+               collapses back (unless there's text).
+    """
+    task_added = Signal()
 
-    QCheckBox::indicator {
-        width: 18px;
-        height: 18px;
-        border-radius: 11px;     /* rounded or 9px for a circle */
-        border: 2px solid #A7A7A7;
-        background: white;
-    }
+    def __init__(self):
+        super().__init__()
+        self.setObjectName("textbox-widget")
+        self.setFixedHeight(_BAR_HEIGHT)
+        self.setStyleSheet(f"""
+            QWidget#textbox-widget {{
+                background: {_BAR_BG};
+                border-top: 1px solid rgba(0,0,0,18);
+            }}
+        """)
 
-    QCheckBox::indicator:hover {
-        border-color: #666;
-    }
+        self.selected_date = None
+        self.selected_time = None
+        self._expanded = False
 
-    QCheckBox::indicator:unchecked {
-        background: white;
-    }
+        # â”€â”€ Collapsed row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        self._collapsed_row = QWidget()
+        self._collapsed_row.setStyleSheet(f"background: {_BAR_BG};")
+        cl = QHBoxLayout(self._collapsed_row)
+        cl.setContentsMargins(16, 0, 8, 0)
+        cl.setSpacing(0)
 
-    QCheckBox::indicator:checked {
-        background: #687681;
-        image: url(./assets/tick.png);   /* custom checkmark icon */
-    }
+        plus_label = QLabel("+")
+        plus_label.setStyleSheet("""
+            QLabel {
+                background: transparent;
+                color: #2564CF;
+                font-size: 20px;
+                font-weight: 400;
+                padding-right: 8px;
+            }
+        """)
 
-    QCheckBox::indicator:indeterminate {
-        background: #FFC107;            /* for tri-state checkboxes */
-    }
+        self._prompt_label = QLabel("Add a task")
+        self._prompt_label.setStyleSheet("""
+            QLabel {
+                background: transparent;
+                color: #444;
+                font-size: 14px;
+                font-family: 'Segoe UI', Arial, sans-serif;
+            }
+        """)
 
-    QCheckBox::indicator:disabled {
-        background: #eee;
-        border-color: #ccc;
-    }
-      
-      
-      
-      
-      """
-      
-    )
-    textbox = QLineEdit()
-    textbox.setPlaceholderText("Type the task and set the time")
-    textbox.setObjectName("text-box")
-    textbox.setFixedHeight(64)
-    textbox.setMaximumWidth(1000)
-    
-    textbox.setStyleSheet(
-      """
-      QLineEdit#text-box{
-        border : none;
-        background : #EAEBED;
-        font-size : 20px;
-        color : #414141;
-        font-family : "Inter";
-        margin-left : 0px;
-      } 
-      """ )  
+        cl.addWidget(plus_label)
+        cl.addWidget(self._prompt_label)
+        cl.addStretch(1)
+        cl.addWidget(self._make_calendar_btn())
+        cl.addSpacing(2)
+        cl.addWidget(self._make_clock_btn())
+        cl.addSpacing(4)
 
-    # Enter key inside the textbox submits the task
-    textbox.returnPressed.connect(self.dump_text)
-    
-    def _asset_path(name):
-      possible_paths = [
-        os.path.join("assets", name),
-        os.path.join("APP", "assets", name),
-        os.path.join(os.path.dirname(__file__), "assets", name),
-      ]
-      for p in possible_paths:
-        if os.path.exists(p):
-          return p
-      return os.path.join("assets", name)  # fall back to original relative guess
+        # Make the whole collapsed row clickable â†’ expand
+        self._collapsed_row.mousePressEvent = lambda e: self.expand()
 
-    calendar_icon = QIcon(_asset_path("calendar-dots-dark.svg"))
-    button_calendar = QPushButton()
-    button_calendar.setIcon(calendar_icon)
-    button_calendar.setIconSize(QSize(28, 28))
-    button_calendar.setFixedHeight(40)
-    button_calendar.clicked.connect(self.open_calendar)
-    button_calendar.setStyleSheet(
-      """
-      QPushButton{
-        border-radius : none;
-        padding-right : 2px;
-        padding-left : 2px;
-      }
-      
-      QPushButton:hover{
-        background: white;
-        border-radius : 8px;
-      }
-      
-      """
-      
-    )
-    calendar_frame = QFrame()
-    calendar_frame.setObjectName("CalendarFrame")
-    calendar_layout = QHBoxLayout(calendar_frame)
-    calendar_layout.addWidget(button_calendar)
-    calendar_frame.setFixedHeight(64)
-    calendar_frame.setStyleSheet(
-      """
-        background :  #EAEBED;
-        border-radius : none;
-        padding-right : 2px;
-        padding-left : 2px;
-      
-      """
-      
-    )
-        
-    
-    clock_icon = QIcon(_asset_path("alarm-light.svg"))
-    button_clock = QPushButton()
-    button_clock.setIcon(clock_icon)
-    button_clock.setIconSize(QSize(28, 28))
-    button_clock.setFixedHeight(40)
-    button_clock.clicked.connect(self.open_time_picker)
-    button_clock.setStyleSheet(
-      """
-      
-      QPushButton{
-        border-radius : none;
-        padding-right : 2px;
-        padding-left : 2px;
-      }
-      
-      QPushButton:hover{
-        background :  white;
-        border-radius : 8px;
-        
-      }
-      
-      """
-      
-    )
+        # â”€â”€ Expanded row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        self._expanded_row = QWidget()
+        self._expanded_row.setStyleSheet(f"background: {_BAR_BG};")
+        el = QHBoxLayout(self._expanded_row)
+        el.setContentsMargins(16, 0, 8, 0)
+        el.setSpacing(0)
 
-    clock_frame = QFrame()
-    clock_frame.setObjectName("ClockFrame")
-    clock_layout = QHBoxLayout(clock_frame)
-    clock_layout.addWidget(button_clock)
-    clock_frame.setFixedHeight(64)
-    clock_frame.setStyleSheet(
-      """
-        background :  #EAEBED;
-        border-radius : none;
-        padding-right : 2px;
-        padding-left : 2px;
-      
-      """
-      
-    )
-    
-    h_layout.addStretch(1)
-    h_layout.addWidget(check_box, 0)
-    h_layout.addWidget(textbox, 0)  # stretch factor 0 -> we control width manually now
-    
-    h_layout.addWidget(calendar_frame, 0) 
-    h_layout.addWidget(clock_frame, 0)
-    h_layout.addStretch(1)
+        self._textbox = QLineEdit()
+        self._textbox.setPlaceholderText("Add a task")
+        self._textbox.setObjectName("text-box")
+        self._textbox.setFixedHeight(36)
+        self._textbox.setStyleSheet(f"""
+            QLineEdit#text-box {{
+                border: none;
+                background: transparent;
+                font-size: 14px;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                color: #222;
+                padding: 0px;
+                margin: 0px;
+            }}
+        """)
+        self._textbox.returnPressed.connect(self.dump_text)
+        # Collapse back if user presses Escape and the field is empty
+        self._textbox.installEventFilter(self)
 
-    self.setLayout(h_layout)
+        self._cal_btn2  = self._make_calendar_btn()
+        self._clk_btn2  = self._make_clock_btn()
 
-    # keep references for resizeEvent to use
-    self.textbox = textbox
-    self.check_box = check_box
-    self.WIDTH_PERCENT = 0.85   # textbox covers 85% of window width until it hits max width
-    self.MAX_TEXTBOX_WIDTH = 1000
+        el.addWidget(self._textbox, 1)
+        el.addStretch(0)
+        el.addWidget(self._cal_btn2)
+        el.addSpacing(2)
+        el.addWidget(self._clk_btn2)
+        el.addSpacing(4)
 
-    # holds the date/time picked via the calendar/clock buttons,
-    # until the task is actually submitted (Enter). Reset after each submit.
-    self.selected_date = None   # e.g. [24, 8, 2026]  -> [day, month, year]
-    self.selected_time = None   # e.g. [14, 30]       -> [hour, minute]
-    
-    self._update_textbox_width()
+        # â”€â”€ Stacked container â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        self._stack = QStackedWidget()
+        self._stack.addWidget(self._collapsed_row)   # index 0
+        self._stack.addWidget(self._expanded_row)    # index 1
+        self._stack.setCurrentIndex(0)
 
-  def resizeEvent(self, event):
-    self._update_textbox_width()
-    super().resizeEvent(event)
+        root = QHBoxLayout(self)
+        root.setContentsMargins(0, 0, 0, 0)
+        root.setSpacing(0)
+        root.addWidget(self._stack)
+        self.setLayout(root)
 
-  def _update_textbox_width(self):
-    available_width = self.width() - self.check_box.maximumWidth()
-    target_width = int(available_width * self.WIDTH_PERCENT)
-    target_width = min(target_width, self.MAX_TEXTBOX_WIDTH)
-    self.textbox.setFixedWidth(target_width)
+    # â”€â”€ State transitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  # ---------------- Calendar / Clock popups ----------------
+    def expand(self):
+        self._expanded = True
+        self._stack.setCurrentIndex(1)
+        self._textbox.setFocus()
 
-  def open_calendar(self):
-    dialog = QDialog(self)
-    dialog.setWindowTitle("Select Date")
-    layout = QVBoxLayout(dialog)
+    def collapse(self):
+        if self._textbox.text().strip():
+            return           # Don't collapse if there's unsaved text
+        self._expanded = False
+        self._stack.setCurrentIndex(0)
+        self._textbox.clear()
 
-    calendar = QCalendarWidget()
-    if self.selected_date:
-      day, month, year = self.selected_date
-      calendar.setSelectedDate(QDate(year, month, day))
-    layout.addWidget(calendar)
+    def eventFilter(self, obj, event):
+        from PySide6.QtCore import QEvent
+        if obj is self._textbox:
+            if event.type() == QEvent.KeyPress:
+                from PySide6.QtGui import QKeyEvent
+                if event.key() == Qt.Key_Escape:
+                    self._textbox.clear()
+                    self.collapse()
+                    return True
+            elif event.type() == QEvent.FocusOut:
+                self.collapse()
+        return super().eventFilter(obj, event)
 
-    buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-    buttons.accepted.connect(dialog.accept)
-    buttons.rejected.connect(dialog.reject)
-    layout.addWidget(buttons)
+    # â”€â”€ Icon button factories â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-    if dialog.exec() == QDialog.Accepted:
-      qdate = calendar.selectedDate()
-      self.selected_date = [qdate.day(), qdate.month(), qdate.year()]
+    def _make_calendar_btn(self):
+        btn = QPushButton()
+        btn.setIcon(QIcon(_asset_path("calendar-dots-dark.svg")))
+        btn.setIconSize(QSize(22, 22))
+        btn.setFixedSize(32, 32)
+        btn.setStyleSheet(_ICON_BTN)
+        btn.setToolTip("Set date")
+        btn.clicked.connect(self.open_calendar)
+        return btn
 
-  def open_time_picker(self):
-    dialog = QDialog(self)
-    dialog.setWindowTitle("Select Time")
-    layout = QVBoxLayout(dialog)
+    def _make_clock_btn(self):
+        btn = QPushButton()
+        btn.setIcon(QIcon(_asset_path("alarm-light.svg")))
+        btn.setIconSize(QSize(22, 22))
+        btn.setFixedSize(32, 32)
+        btn.setStyleSheet(_ICON_BTN)
+        btn.setToolTip("Set time")
+        btn.clicked.connect(self.open_time_picker)
+        return btn
 
-    time_edit = QTimeEdit()
-    time_edit.setDisplayFormat("HH:mm")
-    if self.selected_time:
-      hour, minute = self.selected_time
-      time_edit.setTime(QTime(hour, minute))
-    else:
-      time_edit.setTime(QTime.currentTime())
-    layout.addWidget(time_edit)
+    # â”€â”€ Calendar / Clock popups â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-    buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-    buttons.accepted.connect(dialog.accept)
-    buttons.rejected.connect(dialog.reject)
-    layout.addWidget(buttons)
+    def open_calendar(self):
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Select Date")
+        layout = QVBoxLayout(dialog)
 
-    if dialog.exec() == QDialog.Accepted:
-      qtime = time_edit.time()
-      self.selected_time = [qtime.hour(), qtime.minute()]
+        calendar = QCalendarWidget()
+        if self.selected_date:
+            day, month, year = self.selected_date
+            calendar.setSelectedDate(QDate(year, month, day))
+        layout.addWidget(calendar)
 
-  # ---------------- Task persistence ----------------
-    
-  def _task_json_path(self):
-    possible_paths = [
-      "task.json",
-      os.path.join("APP", "task.json"),
-      os.path.join(os.path.dirname(__file__), "task.json"),
-    ]
-    for p in possible_paths:
-      if os.path.exists(p):
-        return p
-    # Nothing found yet -- create it next to this file so writes have a home.
-    return os.path.join(os.path.dirname(__file__), "task.json")
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        layout.addWidget(buttons)
 
-  def get_task_content(self):
-    path = self._task_json_path()
-    try:
-      with open(path, "r") as f:
-        content = json.load(f)
-    except FileNotFoundError:
-      content = {"task": {}}
-    # "task" is a dict keyed by weekday ("Monday", "Tuesday", ...) in the
-    # real schema -- make sure it's always at least that shape.
-    content.setdefault("task", {})
-    return content
-    
-  def get_text(self):
-    text_content = self.textbox.text()
-    return text_content
+        if dialog.exec() == QDialog.Accepted:
+            qdate = calendar.selectedDate()
+            self.selected_date = [qdate.day(), qdate.month(), qdate.year()]
 
-  def _resolve_target_day(self):
-    """Which weekday bucket a new task lands in: the picked date's own
-    weekday if the user chose one via the calendar, otherwise today."""
-    if self.selected_date:
-      day, month, year = self.selected_date
-      try:
-        return datetime.date(year, month, day).strftime("%A")
-      except ValueError:
-        pass  # fall through to today if the picked date is somehow invalid
-    return datetime.datetime.now().strftime("%A")
+    def open_time_picker(self):
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Select Time")
+        layout = QVBoxLayout(dialog)
 
-  @staticmethod
-  def _today_date_list():
-    today = datetime.date.today()
-    return [today.day, today.month, today.year]
+        time_edit = QTimeEdit()
+        time_edit.setDisplayFormat("HH:mm")
+        if self.selected_time:
+            hour, minute = self.selected_time
+            time_edit.setTime(QTime(hour, minute))
+        else:
+            time_edit.setTime(QTime.currentTime())
+        layout.addWidget(time_edit)
 
-  def dump_text(self):
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        layout.addWidget(buttons)
 
-    task_content = self.get_task_content()
-    text_content = self.get_text()
-    list_trash = ["", ".", ","]
-    added = False
-    if text_content.strip() not in list_trash:
-      target_day = self._resolve_target_day()
-      day_tasks = task_content["task"].setdefault(target_day, [])
+        if dialog.exec() == QDialog.Accepted:
+            qtime = time_edit.time()
+            self.selected_time = [qtime.hour(), qtime.minute()]
 
-      # ids only need to be unique within a day's list, matching the
-      # existing entries (each day currently starts its own id count).
-      next_id = max((t.get("id", 0) for t in day_tasks), default=0) + 1
+    # â”€â”€ Task persistence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-      new_task = {
-        "id": next_id,
-        "task": text_content,
-        "date": self.selected_date if self.selected_date else self._today_date_list(),
-        "time": self.selected_time if self.selected_time else [],
-        "created_at": datetime.datetime.now().isoformat(timespec="seconds"),
-        "done": False,
-        "priority": False,
-      }
-      day_tasks.append(new_task)
-      added = True
+    def _task_json_path(self):
+        return str(TASK_JSON)
 
-      # clear the input and reset the picked date/time for the next task
-      self.textbox.clear()
-      self.selected_date = None
-      self.selected_time = None
-    
+    def get_task_content(self):
+        path = self._task_json_path()
+        try:
+            with open(path, "r") as f:
+                content = json.load(f)
+        except FileNotFoundError:
+            content = {"task": {}}
+        content.setdefault("task", {})
+        return content
 
-    with open(self._task_json_path(), "w") as f:
-      json.dump(task_content, f, indent=2)
+    def get_text(self):
+        return self._textbox.text()
 
-    if added:
-      self.task_added.emit()
+    def _resolve_target_day(self):
+        if self.selected_date:
+            day, month, year = self.selected_date
+            try:
+                return datetime.date(year, month, day).strftime("%A")
+            except ValueError:
+                pass
+        return datetime.datetime.now().strftime("%A")
 
-    
-    
-if __name__=="__main__":    
-  app = QApplication(sys.argv)
+    @staticmethod
+    def _today_date_list():
+        today = datetime.date.today()
+        return [today.day, today.month, today.year]
 
-  widget = TextBox()
-  widget.show()
+    def dump_text(self):
+        task_content = self.get_task_content()
+        text_content = self.get_text()
+        list_trash = ["", ".", ","]
+        added = False
+        if text_content.strip() not in list_trash:
+            target_day = self._resolve_target_day()
+            day_tasks = task_content["task"].setdefault(target_day, [])
+            next_id = max((t.get("id", 0) for t in day_tasks), default=0) + 1
+            new_task = {
+                "id": next_id,
+                "task": text_content,
+                "date": self.selected_date if self.selected_date else self._today_date_list(),
+                "time": self.selected_time if self.selected_time else [],
+                "created_at": datetime.datetime.now().isoformat(timespec="seconds"),
+                "done": False,
+                "priority": False,
+            }
+            day_tasks.append(new_task)
+            added = True
+            self._textbox.clear()
+            self.selected_date = None
+            self.selected_time = None
+            self.collapse()
 
-  app.exec()
+        with open(self._task_json_path(), "w") as f:
+            json.dump(task_content, f, indent=2)
+
+        if added:
+            self.task_added.emit()
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    widget = TextBox()
+    widget.resize(800, _BAR_HEIGHT)
+    widget.show()
+    app.exec()
+

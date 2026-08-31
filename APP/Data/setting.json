@@ -1,0 +1,18 @@
+{
+  "general": {
+    "play_completion_sound": false,
+    "confirm_before_deletion": false,
+    "add_new_task_on_top": false,
+    "pin_pidoes_to_taskbar": false
+  },
+  "themes": {
+    "dark": true,
+    "light": false
+  },
+  "notification": {
+    "allow_notification": false
+  },
+  "mode": {
+    "troll_mode": false
+  }
+}
