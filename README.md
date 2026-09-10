@@ -78,5 +78,12 @@ Troll mode have two feature as of now —
 There are few features of the APP that is not currently implemented but will be coming soon in the next version.
 
 -------
+
+## Special thanks
+
+Special thanks to [@ilham_farooque](https://www.instagram.com/ilham_farooque/), my friend.
+
+------
+
 <div align="center">
 Made with 💛 by Mohammad Sarfaraz aka Sappling.
