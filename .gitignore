@@ -1,5 +1,3 @@
-APP/.env
-
 # Ignore root files except LICENSE, AI-USE.md, README.md, assets, and APP subdirectories
 /*
 !/APP/
@@ -10,5 +8,9 @@ APP/.env
 !/AI-USE.md
 !/README.md
 
-
-
+# Ignore all environment and secret files everywhere
+.env
+*.env
+.env.*
+APP/.env
+APP/Data/.env
