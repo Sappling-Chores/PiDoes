@@ -38,13 +38,6 @@ _ICON_BTN   = """
 
 
 class TextBox(QWidget):
-    """Two-state add-task bar.
-
-    Collapsed: shows "+ Add a task" prompt, calendar + clock icons on the right.
-    Expanded:  shows QLineEdit that fills the full width; same calendar + clock icons
-               stay on the right touching each other.  Clicking away or pressing Escape
-               collapses back (unless there's text).
-    """
     task_added = Signal()
 
     def __init__(self):

@@ -1,10 +1,14 @@
 {
-  "black_listed_app" : [
-    "chrome.exe", 
-    "code.exe"
+  "black_listed_apps" : [
+    "discord.exe",
+    "youtube.exe",
+    "instagram.exe",
+    "minecraft.exe"
   
   ],
   "black_listed_urls" : [
-    "youtube.com"
+    "youtube",
+    "reddit",
+    "instagram"
   ]
 }

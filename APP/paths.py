@@ -19,7 +19,7 @@ TODO_QSS    = BASE_DIR / "to-do.qss"
 SETTING_QSS = BASE_DIR / "setting.qss"
 
 # Icons / SVGs
-APP_ICON       = ASSETS_DIR / "Pi-icon.png"
+APP_ICON       = ASSETS_DIR / "pidoes-logo.png"
 DOTS_THREE_SVG = ASSETS_DIR / "dots-three.svg"
 GEAR_SVG       = ASSETS_DIR / "gear-six-fill.svg"
 ARROW_LEFT_SVG = ASSETS_DIR / "arrow-left-bold.svg"

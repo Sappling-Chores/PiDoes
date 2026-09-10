@@ -23,13 +23,6 @@ except ImportError:
 
 
 class TaskCard(QFrame):
-    """
-    One task row:
-    - grows in height on hover
-    - title enlarges + recolors on hover
-    - checkbox on the left (done), star on the right (priority/important)
-    """
-
     doneToggled = Signal(str, int, bool)      # day, task_id, done
     priorityToggled = Signal(str, int, bool)  # day, task_id, priority
     deleteRequested = Signal(str, int)        # day, task_id
@@ -333,11 +326,9 @@ class ToDoCard(QWidget):
                 self.setStyleSheet(f.read())
 
     def fetch_task(self):
-        """Returns (day_name, list_of_tasks) using centralized task_manager."""
         return task_manager.fetch_tasks_for_view(self.view_mode)
 
     def _update_task_field(self, day, task_id, field, value):
-        """Delegates task updates to task_manager."""
         task_manager.update_task_field(day, task_id, field, value)
 
     def _on_done_toggled(self, day, task_id, done):

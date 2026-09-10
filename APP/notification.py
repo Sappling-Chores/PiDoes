@@ -1,9 +1,3 @@
-"""
-notification.py
-----------------
-System tray icon + due-check timer + Winotify toast notification manager for Pi-Dos.
-"""
-
 import sys
 import os
 import json
@@ -27,27 +21,19 @@ except ImportError:
 
 NEAR_DUE_WINDOW = timedelta(minutes=30)
 OVERDUE_NOTIFICATION_INTERVAL = timedelta(hours=1)
-CHECK_INTERVAL_MS = 30_000  # Check every 30 seconds
+CHECK_INTERVAL_MS = 30_000
 
 
 class NotificationManager(QObject):
-    """Owns the tray icon, due-check timer, and notification dispatching.
-
-    - If multiple tasks are overdue, batches them into a single toast notification.
-    - Re-notifies overdue tasks every 1 hour.
-    - Fires single "due soon" notifications when deadlines approach.
-    """
-
-    task_action = Signal(int, str)  # (task_id, action_name)
+    task_action = Signal(int, str)
 
     def __init__(self, tasks=None, main_window=None, parent=None):
         super().__init__(parent)
-        self.tasks = tasks  # If None, dynamically loaded from task.json
+        self.tasks = tasks
         self.main_window = main_window
         self.last_overdue_notification_time: datetime | None = None
         self._notified_soon_ids: set = set()
 
-        # --- Tray icon setup ---
         if APP_ICON and Path(APP_ICON).exists():
             self.tray_icon = QSystemTrayIcon(QIcon(str(APP_ICON)))
         else:
@@ -64,19 +50,17 @@ class NotificationManager(QObject):
         self.tray_icon.activated.connect(self._on_tray_activated)
         self.tray_icon.show()
 
-        # --- Due-check timer ---
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.check_due_tasks)
 
     def start(self):
         self.timer.start(CHECK_INTERVAL_MS)
-        self.check_due_tasks()  # Run immediately on start
+        self.check_due_tasks()
 
     def stop(self):
         self.timer.stop()
 
     def _is_notification_allowed(self) -> bool:
-        """Checks setting.json to see if notifications are enabled."""
         if SETTING_JSON and Path(SETTING_JSON).exists():
             try:
                 with open(SETTING_JSON, "r", encoding="utf-8") as f:
@@ -87,7 +71,6 @@ class NotificationManager(QObject):
         return True
 
     def _load_tasks(self) -> list[dict]:
-        """Returns in-memory tasks or reads active tasks from task.json."""
         if self.tasks is not None:
             return self.tasks
 
@@ -112,7 +95,6 @@ class NotificationManager(QObject):
         return task_list
 
     def _get_due_datetime(self, task: dict) -> datetime | None:
-        """Parses the due date & time from a task dictionary."""
         if isinstance(task.get("due_time"), datetime):
             return task["due_time"]
 
@@ -236,8 +218,6 @@ class NotificationManager(QObject):
 
 
 class DemoMainWindow(QMainWindow):
-    """Stand-in window for testing tray & notification behavior."""
-
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Pi-Dos (Notification Demo)")

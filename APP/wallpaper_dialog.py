@@ -36,25 +36,10 @@ STATIC_COLORS = [
     "#b8cdd6",  # Ice Blue
 ]
 
-# Fallback unsplash image URLs matching the reference design
-FALLBACK_URLS = [
-    "https://images.unsplash.com/photo-1482784160316-6eb046863ece?crop=entropy&cs=srgb&fm=jpg&w=400&q=80",
-    "https://images.unsplash.com/photo-1475776408506-9a5371e7a068?crop=entropy&cs=srgb&fm=jpg&w=400&q=80",
-    "https://images.unsplash.com/photo-1484995978482-cf913162930c?crop=entropy&cs=srgb&fm=jpg&w=400&q=80",
-    "https://images.unsplash.com/photo-1495710388177-22c73fa5f84e?crop=entropy&cs=srgb&fm=jpg&w=400&q=80",
-    "https://images.unsplash.com/photo-1707653056955-1835d800f4f7?crop=entropy&cs=srgb&fm=jpg&w=400&q=80",
-    "https://images.unsplash.com/photo-1617396900799-f4ec2b43c7ae?crop=entropy&cs=srgb&fm=jpg&w=400&q=80",
-    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?crop=entropy&cs=srgb&fm=jpg&w=400&q=80",
-    "https://images.unsplash.com/photo-1518495973542-4542c06a5843?crop=entropy&cs=srgb&fm=jpg&w=400&q=80",
-    "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?crop=entropy&cs=srgb&fm=jpg&w=400&q=80"
-]
+
 
 
 class WallpaperTile(QWidget):
-    """
-    A square preview tile representing either a static color or an image wallpaper.
-    Acts like an interactive button with hover and active selection ring styling.
-    """
     clicked = Signal(dict)
 
     def __init__(
@@ -167,9 +152,6 @@ class WallpaperTile(QWidget):
 
 
 class WallpaperDialog(QDialog):
-    """
-    A PySide6 Dialog displaying a grid of clickable solid color & image wallpaper previews.
-    """
     wallpaper_selected = Signal(dict)
 
     def __init__(self, parent: Optional[QWidget] = None, current_wallpaper: Optional[Dict[str, Any]] = None):
@@ -322,7 +304,6 @@ class WallpaperDialog(QDialog):
         dialog_layout.addWidget(self.container_frame)
 
     def _load_urls_from_json(self) -> List[str]:
-        """Loads wallpaper URLs from WALLPAPER_URLS_JSON / WALLPAPER_URLS_FILE and deduplicates against fallbacks."""
         possible_paths = [WALLPAPER_URLS_JSON, WALLPAPER_URLS_FILE]
 
         loaded_urls: List[str] = []
@@ -361,16 +342,9 @@ class WallpaperDialog(QDialog):
                 seen_base_ids.add(base_id)
                 deduped_urls.append(u)
 
-        for u in FALLBACK_URLS:
-            base_id = get_base_id(u)
-            if base_id not in seen_base_ids:
-                seen_base_ids.add(base_id)
-                deduped_urls.append(u)
-
         return deduped_urls
 
     def _load_wallpapers(self):
-        """Populates the grid with static colors followed by image wallpapers."""
         columns = 5
         row = 0
         col = 0
@@ -429,7 +403,6 @@ class WallpaperDialog(QDialog):
         self.selected_item = {"type": target_tile.tile_type, "value": target_tile.value}
 
     def get_selected(self) -> Optional[Dict[str, Any]]:
-        """Returns the currently selected item payload dict."""
         return self.selected_item
 
 
