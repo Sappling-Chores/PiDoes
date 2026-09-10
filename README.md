@@ -21,8 +21,11 @@ Pidoes is a windows to-do app made for people who struggle with procastination. 
 
 2. You can create and schedule task by clicking on this label.
 
+<div align ="center">
 
+![alt text](assets/Add_task.png)
 
+</div>
 3. You have multiple banners that you can choose from. If you want to change your task area including some new banners every day. 
 
 <div align="center">
@@ -43,9 +46,20 @@ Pidoes is a windows to-do app made for people who struggle with procastination. 
 
 5. You can also adjust the settings to match your comfort.
 
+<div align ="center">
+
 <img src="./assets/setting_panel.png" style="vertical-align: middle;">
 
+</div>
+
 6. The app also has a troll mode. 
+
+<div align ="center">
+
+![alt text](assets/troll_mode_setting.png)
+
+</div>
+
 
 ## Troll mode
 
@@ -59,13 +73,10 @@ Troll mode have two feature as of now —
 
 ---------
 
-<div align = "center">
+## Note 
 
+There are few features of the APP that is not currently implemented but will be coming soon in the next version.
 
-## Licence
-
-</div>
------
-
+-------
 <div align="center">
 Made with 💛 by Mohammad Sarfaraz aka Sappling.
