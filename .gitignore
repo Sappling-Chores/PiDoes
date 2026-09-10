@@ -1,6 +1,6 @@
 APP/.env
 
-# Ignore root files except LICENSE, AI-USE.md, README.md, and subdirectories
+# Ignore root files except LICENSE, AI-USE.md, README.md, assets, and APP subdirectories
 /*
 !/APP/
 !/assets/
@@ -9,3 +9,6 @@ APP/.env
 !/LICENCE
 !/AI-USE.md
 !/README.md
+
+
+
