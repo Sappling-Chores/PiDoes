@@ -224,6 +224,7 @@ class SettingWindow(QWidget):
       }
     }
     try:
+      SETTING_JSON.parent.mkdir(parents=True, exist_ok=True)
       with open(SETTING_JSON, "w") as f:
         json.dump(settings, f, indent=2)
     except Exception as e:

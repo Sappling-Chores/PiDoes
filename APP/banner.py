@@ -13,19 +13,19 @@ from PySide6.QtCore import Qt, QSize, Signal
 
 try:
     from wallpaper_dialog import WallpaperDialog
-    from paths import BANNER_QSS, URLS_JSON, DOTS_THREE_SVG, GEAR_SVG, SUN_SVG, STAR_SVG, NOTEPAD_SVG
+    from paths import BANNER_QSS, WALLPAPER_URLS_JSON, DOTS_THREE_SVG, GEAR_SVG, SUN_SVG, STAR_SVG, NOTEPAD_SVG
 except ImportError:
     from APP.wallpaper_dialog import WallpaperDialog
-    from APP.paths import BANNER_QSS, URLS_JSON, DOTS_THREE_SVG, GEAR_SVG, SUN_SVG, STAR_SVG, NOTEPAD_SVG
+    from APP.paths import BANNER_QSS, WALLPAPER_URLS_JSON, DOTS_THREE_SVG, GEAR_SVG, SUN_SVG, STAR_SVG, NOTEPAD_SVG
 
 date = datetime.now()
 day_date = date.strftime("%A, %d %B").lstrip()
 
 def fetch_urls():
     try:
-        with open(URLS_JSON, "r", encoding="utf-8") as f:
+        with open(WALLPAPER_URLS_JSON, "r", encoding="utf-8") as f:
             data = json.load(f)
-        return data["urls"][0]
+        return data.get("wallpapers", {})
     except Exception:
         return {}
 

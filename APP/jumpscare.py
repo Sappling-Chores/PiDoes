@@ -11,10 +11,10 @@ import sys
 from pathlib import Path
 
 
-BASE_DIR = Path(__file__).resolve().parent
-print(BASE_DIR)
-image_path = BASE_DIR / "Assets" / "scary.png"
-print(image_path)
+try:
+    from paths import SCARY_IMAGE, JUMPSCARE_SOUND
+except ImportError:
+    from APP.paths import SCARY_IMAGE, JUMPSCARE_SOUND
 
 
 class MainWindow(QMainWindow):
@@ -33,7 +33,7 @@ class MainWindow(QMainWindow):
     )
     h_layout = QHBoxLayout(self.frame)
     label = QLabel()
-    pixmap = QPixmap(str(image_path))
+    pixmap = QPixmap(str(SCARY_IMAGE))
     scaled = pixmap.scaled(
       self.size(),
       Qt.KeepAspectRatio,
@@ -48,7 +48,7 @@ class MainWindow(QMainWindow):
       
     )
     self.sound = QSoundEffect()
-    self.sound.setSource(QUrl.fromLocalFile("./Assets/scary.wav"))
+    self.sound.setSource(QUrl.fromLocalFile(str(JUMPSCARE_SOUND)))
     self.sound.setVolume(1)
     self.sound.play()
     label.setPixmap(scaled)
@@ -56,7 +56,7 @@ class MainWindow(QMainWindow):
     h_layout.addWidget(label)
     h_layout.addStretch(1)
     self.setCentralWidget(self.frame)
-    QTimer.singleShot(5000, self.close)
+    QTimer.singleShot(3000, self.close)
     
 if __name__ == "__main__":
   app = QApplication(sys.argv)

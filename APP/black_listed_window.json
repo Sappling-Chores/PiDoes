@@ -1,0 +1,10 @@
+{
+  "black_listed_app" : [
+    "chrome.exe", 
+    "code.exe"
+  
+  ],
+  "black_listed_urls" : [
+    "youtube.com"
+  ]
+}

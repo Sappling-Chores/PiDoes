@@ -1,0 +1,15 @@
+{
+  "wallpapers": {
+    "desktop-wallpaper": [
+      "https://images.unsplash.com/photo-1452723312111-3a7d0db0e024?ixid=M3wxMDA1OTc2fDB8MXxyYW5kb218fHx8fHx8fHwxNzg4OTgwODg3fA&ixlib=rb-4.1.0",
+      "https://images.unsplash.com/photo-1502209524164-acea936639a2?ixid=M3wxMDA1OTc2fDB8MXxyYW5kb218fHx8fHx8fHwxNzg4OTgwODg3fA&ixlib=rb-4.1.0",
+      "https://images.unsplash.com/photo-1663970206579-c157cba7edda?ixid=M3wxMDA1OTc2fDB8MXxyYW5kb218fHx8fHx8fHwxNzg4OTgwODg3fA&ixlib=rb-4.1.0"
+    ],
+    "nature": "https://images.unsplash.com/photo-1502472584811-0a2f2feb8968?ixid=M3wxMDA1OTc2fDB8MXxyYW5kb218fHx8fHx8fHwxNzg4OTgwODg3fA&ixlib=rb-4.1.0",
+    "japan": "https://images.unsplash.com/photo-1521135990818-4c2ade46567a?ixid=M3wxMDA1OTc2fDB8MXxyYW5kb218fHx8fHx8fHwxNzg4OTgwODg3fA&ixlib=rb-4.1.0",
+    "space": "https://images.unsplash.com/photo-1657586640569-4a3d4577328c?ixid=M3wxMDA1OTc2fDB8MXxyYW5kb218fHx8fHx8fHwxNzg4OTgwODg3fA&ixlib=rb-4.1.0",
+    "technology": "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?ixid=M3wxMDA1OTc2fDB8MXxyYW5kb218fHx8fHx8fHwxNzg4OTgwODg3fA&ixlib=rb-4.1.0",
+    "city-skyline": "https://images.unsplash.com/photo-1666058322408-be43487b7b40?ixid=M3wxMDA1OTc2fDB8MXxyYW5kb218fHx8fHx8fHwxNzg4OTgwODg4fA&ixlib=rb-4.1.0",
+    "3d-renders": "https://images.unsplash.com/photo-1756999090516-ab87f8e18071?ixid=M3wxMDA1OTc2fDB8MXxyYW5kb218fHx8fHx8fHwxNzg4OTgwODg4fA&ixlib=rb-4.1.0"
+  }
+}

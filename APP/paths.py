@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 def get_base_path() -> Path:
-    """Handles both dev mode and PyInstaller-frozen .exe."""
+    
     if getattr(sys, 'frozen', False):
         return Path(sys._MEIPASS)
     return Path(__file__).parent
@@ -25,21 +25,29 @@ GEAR_SVG       = ASSETS_DIR / "gear-six-fill.svg"
 ARROW_LEFT_SVG = ASSETS_DIR / "arrow-left-bold.svg"
 TICK_PNG       = ASSETS_DIR / "tick.png"
 STAR_SVG       = ASSETS_DIR / "star.svg"
+STAR_FILL_SVG  = ASSETS_DIR / "star-fill.svg"
 GHOST_PNG      = ASSETS_DIR / "ghost.png"
 SUN_SVG        = ASSETS_DIR / "sun.svg"
 NOTEPAD_SVG    = ASSETS_DIR / "notepad.svg"
 
 # Data files (local, bundled with the app)
-URLS_JSON    = BASE_DIR / "urls.json"
+
+WALLPAPER_URLS_JSON = BASE_DIR / "wallpaper_urls.json"
 TASK_JSON    = BASE_DIR / "task.json"
 DATA_DIR     = BASE_DIR / "Data"
 SETTING_JSON = DATA_DIR / "setting.json"
+BLACK_LISTED_WINDOW_JSON = BASE_DIR / "black_listed_window.json"
 
-# Audio
+# Audio & Media
 COMPLETION_SOUND = AUDIOS_DIR / "completion_sound.mp3"
 JUMPSCARE_SOUND  = AUDIOS_DIR / "jumpscare_sound.wav"
+SCARY_IMAGE      = ASSETS_DIR / "scary.png"
 
-# App-data (user-specific, persisted outside the install dir)
+
 APP_DATA_DIR  = Path(os.getenv("APPDATA", "")) / "PiDos"
+
 TASKS_FILE    = APP_DATA_DIR / "tasks.json"
 SETTINGS_FILE = APP_DATA_DIR / "settings.json"
+WALLPAPER_URLS_FILE = APP_DATA_DIR / "wallpaper_urls.json"
+BLACK_LISTED_WINDOW_FILE = APP_DATA_DIR / "black_listed_window.json"
+

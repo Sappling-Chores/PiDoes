@@ -1,0 +1,208 @@
+Pi-Dos Personal & Educational Use License
+Version 1.0 — 2026
+
+Copyright (c) 2026 Mohammad Sarfaraz ("ayysappling", GitHub: Sappling-Chores)
+All rights reserved.
+
+This is a custom, source-available license. It is NOT an open-source license,
+is NOT approved by the Open Source Initiative (OSI), and does NOT grant the
+freedoms associated with licenses such as MIT, Apache-2.0, or GPL-3.0. The
+source code of Pi-Dos ("the Software") is made publicly viewable for
+transparency and educational purposes only. Making the Software publicly
+available on GitHub or any other platform does not, by itself, grant any
+right to copy, redistribute, publish, or commercially exploit it beyond what
+is expressly stated below.
+
+────────────────────────────────────────────────────────────────────────────
+1. DEFINITIONS
+────────────────────────────────────────────────────────────────────────────
+
+"Software" means the Pi-Dos source code, object code, documentation, assets,
+and any files distributed as part of the Pi-Dos repository, in whole or in
+part.
+
+"Modified Version" means any version of the Software that has been altered,
+adapted, translated, or built upon, in source or compiled form.
+
+"Substantial Portion" means any part of the Software that is independently
+functional, readily recognizable as derived from the Software, or that
+reproduces its distinctive structure, logic, or design in a way that a
+reasonable developer would identify as taken from Pi-Dos. Small, generic code
+fragments used purely to illustrate a general programming concept are not
+considered a Substantial Portion.
+
+"Commercial Use" means any use of the Software, or a Modified Version, that
+is: (a) by or on behalf of a business or organization in the course of its
+operations; (b) incorporated into a product or service that is sold, licensed,
+or monetized in any way (including via advertising, subscriptions, or paid
+support); or (c) otherwise intended to generate, or that does generate,
+revenue or commercial advantage, whether directly or indirectly.
+
+"You" means the individual or entity exercising any permission granted by
+this license.
+
+────────────────────────────────────────────────────────────────────────────
+2. PERMISSIONS GRANTED
+────────────────────────────────────────────────────────────────────────────
+
+Subject to the Restrictions and Conditions below, the copyright holder grants
+You a limited, non-exclusive, non-transferable, revocable license to:
+
+  a. View and study the source code for any purpose, including learning how
+     it works.
+  b. Download a copy of the source code for personal or educational purposes.
+  c. Run the Software, unmodified, for personal, non-commercial, or
+     educational purposes.
+  d. Modify the source code for Your own personal or educational purposes.
+  e. Create and keep private Modified Versions for personal or educational
+     use, without publishing or distributing them.
+  f. Use non-substantial portions of the code for learning, experimentation,
+     coursework, tutorials, or similar educational projects, provided such
+     use complies with Section 3.
+
+No other rights are granted, whether by implication, estoppel, or otherwise.
+The fact that the Software's source code is hosted on a public platform
+(such as GitHub) — including the availability of platform features such as
+"fork," "clone," "star," or "download" — does not itself constitute
+permission to redistribute, publish, or commercially exploit the Software.
+Any such use remains governed by, and restricted by, this license.
+
+────────────────────────────────────────────────────────────────────────────
+3. RESTRICTIONS
+────────────────────────────────────────────────────────────────────────────
+
+Without the prior explicit written permission of the copyright holder, You
+may NOT:
+
+  a. Redistribute the original source code of the Software, in whole or in
+     part.
+  b. Redistribute a Modified Version of the Software, in whole or in part.
+  c. Publish, upload, or otherwise make available the complete source code
+     of the Software on any other website, repository, or hosting service.
+  d. Mirror the repository, or otherwise republish a copy of the Software's
+     source code, on any other hosting service or platform.
+  e. Redistribute compiled binaries, executables, installers, packages, or
+     any other built or packaged form of the Software or a Modified Version.
+  f. Sell the Software or any Modified Version, in source, compiled, or
+     packaged form.
+  g. Make any Commercial Use of the Software or a Modified Version.
+  h. Include the Software, a Modified Version, or a Substantial Portion of
+     either, in a commercial product or service.
+  i. Publish or otherwise make available a Modified Version of the Software
+     for others to download, clone, install, or run.
+  j. Remove, obscure, or alter any copyright notice, attribution, or license
+     notice contained in the Software.
+
+For clarity, and without limiting the above: privately modifying the
+Software for your own personal or educational use (Section 2(d)–(e)) is
+permitted; publishing, sharing, or otherwise making that modified version
+available to any third party is not, regardless of whether it is offered
+free of charge.
+
+────────────────────────────────────────────────────────────────────────────
+4. THREE LEVELS OF USE — SUMMARY
+────────────────────────────────────────────────────────────────────────────
+
+This license draws a firm line between three distinct activities:
+
+  (1) STUDYING/VIEWING the source code — always permitted.
+  (2) PRIVATELY MODIFYING it for your own personal or educational use —
+      permitted, so long as the result is not shared, published, or
+      distributed to anyone else.
+  (3) PUBLICLY REDISTRIBUTING the original or a modified version, in any
+      form (source, compiled, or packaged) — NOT permitted without the
+      copyright holder's prior explicit written permission.
+
+────────────────────────────────────────────────────────────────────────────
+5. CONDITIONS OF PERMITTED USE
+────────────────────────────────────────────────────────────────────────────
+
+  a. Any permitted copy of the Software, or any portion of it, must retain
+     this license file and all original copyright notices intact.
+  b. Any educational or learning use that references or reproduces a
+     non-substantial portion of the code (e.g., in a tutorial, blog post, or
+     coursework) must credit "Pi-Dos" and its copyright holder.
+  c. Unsolicited contributions (e.g., pull requests, patches, or suggestions)
+     submitted to the official Pi-Dos repository are deemed to be licensed
+     to the copyright holder, who may incorporate them into the Software
+     without further obligation, unless a separate written agreement states
+     otherwise.
+
+────────────────────────────────────────────────────────────────────────────
+6. REQUESTS FOR PERMISSION
+────────────────────────────────────────────────────────────────────────────
+
+Uses beyond those expressly granted in Section 2 — including any form of
+redistribution, publication of Modified Versions, or Commercial Use —
+require the prior explicit written permission of the copyright holder.
+Requests may be directed to the copyright holder via the contact
+information provided in the official Pi-Dos repository.
+
+────────────────────────────────────────────────────────────────────────────
+7. TRADEMARK
+────────────────────────────────────────────────────────────────────────────
+
+This license does not grant permission to use the name "Pi-Dos," or any
+associated logos or branding, to endorse, promote, or name derivative
+projects, without separate written permission.
+
+────────────────────────────────────────────────────────────────────────────
+8. TERMINATION
+────────────────────────────────────────────────────────────────────────────
+
+This license and all rights granted under it terminate automatically if You
+breach any of its terms. Upon termination, You must immediately cease all
+use of the Software and destroy all copies, modified or unmodified, in Your
+possession or control. Sections 3, 7, 8, 9, 10, and 11 survive termination.
+
+────────────────────────────────────────────────────────────────────────────
+9. DISCLAIMER OF WARRANTY
+────────────────────────────────────────────────────────────────────────────
+
+THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. THE COPYRIGHT HOLDER
+DOES NOT WARRANT THAT THE SOFTWARE WILL BE ERROR-FREE, SECURE, OR
+UNINTERRUPTED, OR THAT IT WILL MEET YOUR REQUIREMENTS.
+
+────────────────────────────────────────────────────────────────────────────
+10. LIMITATION OF LIABILITY
+────────────────────────────────────────────────────────────────────────────
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF,
+OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE, INCLUDING BUT NOT LIMITED TO DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGES.
+
+────────────────────────────────────────────────────────────────────────────
+11. RESERVATION OF RIGHTS
+────────────────────────────────────────────────────────────────────────────
+
+All rights not expressly granted to You under this license are reserved by
+the copyright holder. No license, right, or interest in any trademark,
+trade name, service mark, or other intellectual property of the copyright
+holder is granted under this license, except as expressly stated.
+
+────────────────────────────────────────────────────────────────────────────
+12. GOVERNING LAW
+────────────────────────────────────────────────────────────────────────────
+
+This license shall be governed by and construed in accordance with the laws
+of [JURISDICTION — e.g., India], without regard to its conflict-of-law
+principles.
+
+────────────────────────────────────────────────────────────────────────────
+13. SEVERABILITY
+────────────────────────────────────────────────────────────────────────────
+
+If any provision of this license is held to be unenforceable or invalid,
+that provision will be limited or eliminated to the minimum extent
+necessary, and the remaining provisions will remain in full force and
+effect.
+
+────────────────────────────────────────────────────────────────────────────
+
+END OF LICENSE

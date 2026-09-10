@@ -1,8 +1,7 @@
-from datetime import datetime
-import requests
-import os
-from dotenv import load_dotenv
-import json
+try:
+    from paths import WALLPAPER_URLS_JSON
+except ImportError:
+    from APP.paths import WALLPAPER_URLS_JSON
 
 load_dotenv()
 ACCESS_KEY = os.getenv("ACCESS_KEY")
@@ -12,10 +11,11 @@ date, month , year = date.day, date.month, date.year
 new_date = [year, month, date]
 
 def fetch_data():
-    json_file = "urls.json"
-    with open(json_file, "r") as f:
-        data = json.load(f)
-    return data
+    if WALLPAPER_URLS_JSON.exists():
+        with open(WALLPAPER_URLS_JSON, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data
+    return {}
 
 def get_urls(query: list, orientation: str):
     old_date, old_month, old_year = 23, 8, 2026
@@ -32,21 +32,20 @@ def get_urls(query: list, orientation: str):
     return url_list
 
 def update_data():
-    json_file = "urls.json"
     data = fetch_data()
-    last_checked = data["last_checked"]
+    last_checked = data.get("last_checked")
     if new_date != last_checked:
-        query_list = ["wallpaper", "nature", "japan", "landscape", "in-space", "technology"]
+        query_list = ["desktop-wallpaper", "nature", "japan", "space", "technology", "city-skyline", "3d-renders"]
         urls = get_urls(query_list, "landscape")
         print(urls)
-        updated_date = new_date
-        data["last_checked"] = updated_date
-        print(len(query_list))
+        data["last_checked"] = new_date
         
+        if "wallpapers" not in data or not isinstance(data["wallpapers"], dict):
+            data["wallpapers"] = {}
         for query, url in zip(query_list, urls):
-            data["urls"][0][query] = url
+            data["wallpapers"][query] = url
 
-        with open(json_file, "w") as f:
+        with open(WALLPAPER_URLS_JSON, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
         
     

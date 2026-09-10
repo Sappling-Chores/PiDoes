@@ -14,10 +14,12 @@ from PySide6.QtSvg import QSvgRenderer
 
 try:
     from textbox import TextBox
-    from paths import TODO_QSS, TASK_JSON
+    from paths import TODO_QSS, TASK_JSON, STAR_SVG, STAR_FILL_SVG
+    import task_manager
 except ImportError:
     from APP.textbox import TextBox
-    from APP.paths import TODO_QSS, TASK_JSON
+    from APP.paths import TODO_QSS, TASK_JSON, STAR_SVG, STAR_FILL_SVG
+    import APP.task_manager as task_manager
 
 
 class TaskCard(QFrame):
@@ -94,8 +96,11 @@ class TaskCard(QFrame):
         self.star_button.setObjectName("star-button")
         self.star_button.setCheckable(True)
         is_prio = bool(self.task_data.get("priority", False) or self.task_data.get("important", False))
+        self.star_button.blockSignals(True)
         self.star_button.setChecked(is_prio)
+        self.star_button.blockSignals(False)
         self.star_button.setFixedSize(30, 30)
+        self.star_button.setIconSize(QSize(20, 20))
         self.star_button.setCursor(Qt.PointingHandCursor)
         self._sync_star_icon()
         self.star_button.toggled.connect(self._on_priority_changed)
@@ -124,7 +129,13 @@ class TaskCard(QFrame):
         return f"{date_str}  {time_str}".strip() if time_str else date_str
 
     def _sync_star_icon(self):
-        self.star_button.setText("★" if self.star_button.isChecked() else "☆")
+        is_important = self.star_button.isChecked()
+        icon_path = STAR_FILL_SVG if is_important else STAR_SVG
+        if icon_path.exists():
+            self.star_button.setIcon(QIcon(str(icon_path)))
+            self.star_button.setText("")
+        else:
+            self.star_button.setText("★" if is_important else "☆")
 
     def _on_done_changed(self, state):
         done = bool(state)
@@ -202,7 +213,6 @@ class ToDoCard(QWidget):
         self.setWindowTitle("To-Do-Card")
         self.view_mode = "my_day"
         self._load_stylesheet()
-        self._json_path = self._find_task_json()
 
         self.tasks_layout = QVBoxLayout()
         self.tasks_layout.setSpacing(12)
@@ -251,14 +261,11 @@ class ToDoCard(QWidget):
                 if not isinstance(date_val, str):
                     return None
                 date_val = date_val.strip()
-                try:
-                    return datetime.strptime(date_val, "%Y-%m-%d")
-                except ValueError:
-                    pass
-                try:
-                    return datetime.strptime(date_val, "%d %B, %Y")
-                except ValueError:
-                    pass
+                for fmt in ("%Y-%m-%d", "%d %B, %Y"):
+                    try:
+                        return datetime.strptime(date_val, fmt)
+                    except ValueError:
+                        pass
                 return None
 
             for task_data in tasks:
@@ -325,132 +332,13 @@ class ToDoCard(QWidget):
             with open(TODO_QSS, "r", encoding="utf-8") as f:
                 self.setStyleSheet(f.read())
 
-    def _find_task_json(self):
-        if TASK_JSON.exists():
-            return TASK_JSON
-        possible_paths = [
-            "task.json",
-            os.path.join("APP", "task.json"),
-            os.path.join(os.path.dirname(__file__), "task.json"),
-        ]
-        for p in possible_paths:
-            if os.path.exists(p):
-                return p
-        print("error: task.json not found")
-        return None
-
     def fetch_task(self):
-        """Returns (day_name, list_of_tasks) for today or filtered view, matching the
-        structure in task.json."""
-        day = datetime.now().strftime("%A")
-        if not self._json_path:
-            return day, []
-        try:
-            with open(self._json_path, "r", encoding="utf-8") as f:
-                file_content = json.load(f)
-
-            if self.view_mode == "important":
-                important_tasks = []
-                task_root = file_content.get("task", {})
-                if isinstance(task_root, dict):
-                    for day_key, task_list in task_root.items():
-                        if isinstance(task_list, list):
-                            for task in task_list:
-                                if task.get("priority", False) or task.get("important", False):
-                                    task_copy = dict(task)
-                                    task_copy["_day_key"] = day_key
-                                    important_tasks.append(task_copy)
-                return "Important", important_tasks
-
-            elif self.view_mode in ("old_tasks", "last_week", "older"):
-                old_tasks = []
-                incomplete = file_content.get("incomplete_task", [])
-                if isinstance(incomplete, list):
-                    for idx, item in enumerate(incomplete):
-                        if isinstance(item, list) and len(item) >= 2:
-                            task_name = item[0]
-                            date_val = item[1]
-                            if isinstance(date_val, list):
-                                schedule_str = "  ".join(str(x) for x in date_val)
-                            else:
-                                schedule_str = str(date_val)
-
-                            task_dict = {
-                                "id": idx,
-                                "task": task_name,
-                                "done": False,
-                                "priority": False,
-                                "schedule_text_override": schedule_str,
-                                "_day_key": "incomplete_task",
-                                "_original_date_val": date_val
-                            }
-
-                            if self.view_mode == "old_tasks":
-                                old_tasks.append(task_dict)
-                            else:
-                                now = datetime.now()
-                                dt = None
-                                if isinstance(date_val, list) and len(date_val) == 3 and all(isinstance(x, int) for x in date_val):
-                                    try:
-                                        dt = datetime(date_val[2], date_val[1], date_val[0])
-                                    except ValueError:
-                                        pass
-                                days_diff = (now - dt).days if dt else 999
-                                if self.view_mode == "last_week" and days_diff <= 7:
-                                    old_tasks.append(task_dict)
-                                elif self.view_mode == "older" and days_diff > 7:
-                                    old_tasks.append(task_dict)
-
-                title_map = {
-                    "old_tasks": "Old Tasks",
-                    "last_week": "Last Week Tasks",
-                    "older": "Older Tasks"
-                }
-                return title_map[self.view_mode], old_tasks
-
-            else:
-                task_root = file_content.get("task", {})
-                if isinstance(task_root, dict):
-                    tasks = task_root.get(day, [])
-                    if isinstance(tasks, list):
-                        # Sort so that priority (important) tasks come first (True before False)
-                        tasks = sorted(tasks, key=lambda x: not (x.get("priority", False) or x.get("important", False)))
-                    return day, tasks
-                if isinstance(task_root, list):
-                    task_root = sorted(task_root, key=lambda x: not (x.get("priority", False) or x.get("important", False)))
-                return day, task_root
-        except Exception as e:
-            print(f"error reading task.json: {e}")
-            return day, []
+        """Returns (day_name, list_of_tasks) using centralized task_manager."""
+        return task_manager.fetch_tasks_for_view(self.view_mode)
 
     def _update_task_field(self, day, task_id, field, value):
-        if not self._json_path or task_id is None:
-            return
-        try:
-            with open(self._json_path, "r", encoding="utf-8") as f:
-                file_content = json.load(f)
-
-            if day == "incomplete_task":
-                if field == "done" and value:
-                    incomplete = file_content.get("incomplete_task", [])
-                    if 0 <= task_id < len(incomplete):
-                        incomplete.pop(task_id)
-            else:
-                task_root = file_content.get("task", {})
-                if isinstance(task_root, dict):
-                    day_tasks = task_root.get(day, [])
-                    for t in day_tasks:
-                        if t.get("id") == task_id:
-                            t[field] = value
-                            if field in ("priority", "important"):
-                                t["priority"] = value
-                                t["important"] = value
-                            break
-
-            with open(self._json_path, "w", encoding="utf-8") as f:
-                json.dump(file_content, f, indent=2)
-        except Exception as e:
-            print(f"error updating task.json: {e}")
+        """Delegates task updates to task_manager."""
+        task_manager.update_task_field(day, task_id, field, value)
 
     def _on_done_toggled(self, day, task_id, done):
         self._update_task_field(day, task_id, "done", done)
@@ -466,20 +354,7 @@ class ToDoCard(QWidget):
         self.refresh_tasks()
 
     def _remove_task(self, day, task_id):
-        if not self._json_path or task_id is None:
-            return
-        try:
-            with open(self._json_path, "r", encoding="utf-8") as f:
-                file_content = json.load(f)
-            task_root = file_content.get("task", {})
-            if isinstance(task_root, dict):
-                for d_key, day_tasks in task_root.items():
-                    if isinstance(day_tasks, list):
-                        file_content["task"][d_key] = [t for t in day_tasks if t.get("id") != task_id]
-            with open(self._json_path, "w", encoding="utf-8") as f:
-                json.dump(file_content, f, indent=2)
-        except Exception as e:
-            print(f"error removing task from task.json: {e}")
+        task_manager.remove_task(day, task_id)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,11 @@
+APP/.env
+
+# Ignore root files except LICENSE, AI-USE.md, README.md, and subdirectories
+/*
+!/APP/
+!/assets/
+!/.gitignore
+!/LICENSE
+!/LICENCE
+!/AI-USE.md
+!/README.md

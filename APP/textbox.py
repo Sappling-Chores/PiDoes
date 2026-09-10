@@ -1,4 +1,4 @@
-﻿import sys
+import sys
 import os
 import datetime
 from PySide6.QtWidgets import (
@@ -12,15 +12,15 @@ import json
 
 try:
     from paths import ASSETS_DIR, TASK_JSON
+    import task_manager
 except ImportError:
     from APP.paths import ASSETS_DIR, TASK_JSON
+    import APP.task_manager as task_manager
 
 
 def _asset_path(name):
     return str(ASSETS_DIR / name)
 
-
-# â”€â”€ Shared style constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 _BAR_HEIGHT = 56
 _BAR_BG     = "rgba(255, 255, 255, 140)"
 _ICON_BTN   = """
@@ -62,7 +62,7 @@ class TextBox(QWidget):
         self.selected_time = None
         self._expanded = False
 
-        # â”€â”€ Collapsed row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
         self._collapsed_row = QWidget()
         self._collapsed_row.setStyleSheet(f"background: {_BAR_BG};")
         cl = QHBoxLayout(self._collapsed_row)
@@ -98,10 +98,10 @@ class TextBox(QWidget):
         cl.addWidget(self._make_clock_btn())
         cl.addSpacing(4)
 
-        # Make the whole collapsed row clickable â†’ expand
-        self._collapsed_row.mousePressEvent = lambda e: self.expand()
+        # Make the whole collapsed row clickable → expand
+        self._collapsed_row.mousePressEvent = lambda e: self.expand() #pop
 
-        # â”€â”€ Expanded row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
         self._expanded_row = QWidget()
         self._expanded_row.setStyleSheet(f"background: {_BAR_BG};")
         el = QHBoxLayout(self._expanded_row)
@@ -137,7 +137,6 @@ class TextBox(QWidget):
         el.addWidget(self._clk_btn2)
         el.addSpacing(4)
 
-        # â”€â”€ Stacked container â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         self._stack = QStackedWidget()
         self._stack.addWidget(self._collapsed_row)   # index 0
         self._stack.addWidget(self._expanded_row)    # index 1
@@ -149,7 +148,6 @@ class TextBox(QWidget):
         root.addWidget(self._stack)
         self.setLayout(root)
 
-    # â”€â”€ State transitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def expand(self):
         self._expanded = True
@@ -176,7 +174,6 @@ class TextBox(QWidget):
                 self.collapse()
         return super().eventFilter(obj, event)
 
-    # â”€â”€ Icon button factories â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _make_calendar_btn(self):
         btn = QPushButton()
@@ -198,7 +195,6 @@ class TextBox(QWidget):
         btn.clicked.connect(self.open_time_picker)
         return btn
 
-    # â”€â”€ Calendar / Clock popups â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def open_calendar(self):
         dialog = QDialog(self)
@@ -243,67 +239,21 @@ class TextBox(QWidget):
             qtime = time_edit.time()
             self.selected_time = [qtime.hour(), qtime.minute()]
 
-    # â”€â”€ Task persistence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-    def _task_json_path(self):
-        return str(TASK_JSON)
 
     def get_task_content(self):
-        path = self._task_json_path()
-        try:
-            with open(path, "r") as f:
-                content = json.load(f)
-        except FileNotFoundError:
-            content = {"task": {}}
-        content.setdefault("task", {})
-        return content
+        return task_manager.load_task_data()
 
     def get_text(self):
         return self._textbox.text()
 
-    def _resolve_target_day(self):
-        if self.selected_date:
-            day, month, year = self.selected_date
-            try:
-                return datetime.date(year, month, day).strftime("%A")
-            except ValueError:
-                pass
-        return datetime.datetime.now().strftime("%A")
-
-    @staticmethod
-    def _today_date_list():
-        today = datetime.date.today()
-        return [today.day, today.month, today.year]
-
     def dump_text(self):
-        task_content = self.get_task_content()
         text_content = self.get_text()
-        list_trash = ["", ".", ","]
-        added = False
-        if text_content.strip() not in list_trash:
-            target_day = self._resolve_target_day()
-            day_tasks = task_content["task"].setdefault(target_day, [])
-            next_id = max((t.get("id", 0) for t in day_tasks), default=0) + 1
-            new_task = {
-                "id": next_id,
-                "task": text_content,
-                "date": self.selected_date if self.selected_date else self._today_date_list(),
-                "time": self.selected_time if self.selected_time else [],
-                "created_at": datetime.datetime.now().isoformat(timespec="seconds"),
-                "done": False,
-                "priority": False,
-            }
-            day_tasks.append(new_task)
-            added = True
+        added = task_manager.add_task(text_content, self.selected_date, self.selected_time)
+        if added:
             self._textbox.clear()
             self.selected_date = None
             self.selected_time = None
             self.collapse()
-
-        with open(self._task_json_path(), "w") as f:
-            json.dump(task_content, f, indent=2)
-
-        if added:
             self.task_added.emit()
 
 

@@ -6,9 +6,9 @@ import json
 from typing import Optional, Dict, Any, List
 
 try:
-    from paths import URLS_JSON
+    from paths import WALLPAPER_URLS_JSON, WALLPAPER_URLS_FILE
 except ImportError:
-    from APP.paths import URLS_JSON
+    from APP.paths import WALLPAPER_URLS_JSON, WALLPAPER_URLS_FILE
 
 from PySide6.QtWidgets import (
     QApplication, QDialog, QWidget, QVBoxLayout, QHBoxLayout,
@@ -322,25 +322,29 @@ class WallpaperDialog(QDialog):
         dialog_layout.addWidget(self.container_frame)
 
     def _load_urls_from_json(self) -> List[str]:
-        """Loads wallpaper URLs from urls.json (checks local dir and APP/urls.json) and deduplicates against fallbacks."""
-        possible_paths = [
-            "urls.json",
-            os.path.join("APP", "urls.json"),
-            os.path.join(os.path.dirname(__file__), "urls.json"),
-            os.path.join(os.path.dirname(__file__), "APP", "urls.json")
-        ]
+        """Loads wallpaper URLs from WALLPAPER_URLS_JSON / WALLPAPER_URLS_FILE and deduplicates against fallbacks."""
+        possible_paths = [WALLPAPER_URLS_JSON, WALLPAPER_URLS_FILE]
 
         loaded_urls: List[str] = []
         for path in possible_paths:
-            if os.path.exists(path):
+            if path and path.exists():
                 try:
                     with open(path, "r", encoding="utf-8") as f:
                         data = json.load(f)
-                    urls_entry = data.get("urls", [])
-                    if isinstance(urls_entry, list) and len(urls_entry) > 0:
-                        url_dict = urls_entry[0]
-                        if isinstance(url_dict, dict):
-                            loaded_urls = list(url_dict.values())
+                    wallpapers = data.get("wallpapers", {})
+                    if isinstance(wallpapers, dict):
+                        for val in wallpapers.values():
+                            if isinstance(val, str):
+                                loaded_urls.append(val)
+                            elif isinstance(val, dict) and "image_url" in val:
+                                loaded_urls.append(val["image_url"])
+                            elif isinstance(val, list):
+                                for item in val:
+                                    if isinstance(item, dict) and "image_url" in item:
+                                        loaded_urls.append(item["image_url"])
+                                    elif isinstance(item, str):
+                                        loaded_urls.append(item)
+                        if loaded_urls:
                             break
                 except Exception as e:
                     print(f"[WallpaperDialog] Error reading {path}: {e}")
