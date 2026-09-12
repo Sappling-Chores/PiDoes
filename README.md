@@ -79,9 +79,11 @@ There are few features of the APP that is not currently implemented but will be 
 
 -------
 
-## Special thanks
+## Collaborator
 
-Special thanks to [@ilham_farooque](https://www.instagram.com/ilham_farooque/), my friend.
+**[@ilham_farooque](https://www.instagram.com/ilham_farooque/), my good friend is supposed to work on the website part of the PiDoes.**
+
+I am still waiting for him though!! 😭
 
 ------
 
