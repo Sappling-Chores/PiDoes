@@ -30,9 +30,9 @@ Pidoes is a windows to-do app made for people who struggle with procastination. 
 
 <div align="center">
 
-<img src="./assets/wallpaper_banner_2.png" width ="400" height=auto style="vertical-align: middle;">
-
-<img src="./assets/wallpaper_banner_1.png" width ="400" height=auto style="vertical-align: middle;">
+<img src="./assets/wallpaper_banner_2.png" style="vertical-align: middle;">
+<br>
+<img src="./assets/wallpaper_banner_1.png" style="vertical-align: middle;">
 
 </div>
 
